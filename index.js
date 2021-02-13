@@ -60,8 +60,10 @@ app.post("/", async (req, res) => {
       { upsert: true }
     );
     await res.send(true);
+    console.log("sending:", true);
   } else {
     await res.send(false);
+    console.log("sending:", false);
   }
 });
 
