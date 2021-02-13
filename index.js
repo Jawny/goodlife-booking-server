@@ -25,6 +25,7 @@ const PORT = process.env.PORT || 8000;
 const userDataSchema = new mongoose.Schema({
   email: String,
   password: String,
+  clubId: Number,
   monday: Number,
   tuesday: Number,
   wednesday: Number,
@@ -46,6 +47,7 @@ app.post("/", async (req, res) => {
       {
         $set: {
           password: encryptedPassword,
+          clubId: req.body.clubId,
           monday: req.body.monday,
           tuesday: req.body.tuesday,
           wednesday: req.body.wednesday,
@@ -58,8 +60,10 @@ app.post("/", async (req, res) => {
       { upsert: true }
     );
     await res.send(true);
+    console.log("sending:", true);
   } else {
     await res.send(false);
+    console.log("sending:", false);
   }
 });
 
