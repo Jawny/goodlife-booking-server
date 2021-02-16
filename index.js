@@ -25,6 +25,7 @@ const PORT = process.env.PORT || 8000;
 const userDataSchema = new mongoose.Schema({
   email: String,
   password: String,
+  province: String,
   clubId: Number,
   monday: Number,
   tuesday: Number,
@@ -48,6 +49,7 @@ app.post("/", async (req, res) => {
         $set: {
           password: encryptedPassword,
           clubId: req.body.clubId,
+          province: req.body.province,
           monday: req.body.monday,
           tuesday: req.body.tuesday,
           wednesday: req.body.wednesday,
