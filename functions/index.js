@@ -3,7 +3,9 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const Cryptr = require("cryptr");
-const { CheckLoginCredentials } = require("./CheckLoginCredentials");
+const admin = require("firebase-admin");
+const functions = require("firebase-functions");
+const { AuthMiddleWare, CheckLoginCredentials } = require("./utils/index");
 require("dotenv").config();
 
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
@@ -13,13 +15,17 @@ mongoose.connect(
   { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }
 );
 
+admin.initializeApp();
+
 const app = express();
-app.use(cors());
+
+// protects ALL routes
+app.use(AuthMiddleWare);
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
-
 // parse application/json
 app.use(bodyParser.json());
+app.use(cors());
 
 const PORT = process.env.PORT || 8000;
 const userDataSchema = new mongoose.Schema({
