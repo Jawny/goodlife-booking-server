@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const Cryptr = require("cryptr");
-const { CheckLoginCredentials } = require("./CheckLoginCredentials");
+const { verifyLoginCredentials } = require("./utils/verifyLoginCredentials");
 require("dotenv").config();
 
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
@@ -23,6 +23,7 @@ app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 8000;
 const userDataSchema = new mongoose.Schema({
+  userid: String,
   email: String,
   password: String,
   province: String,
@@ -39,14 +40,18 @@ const userDataSchema = new mongoose.Schema({
 const userData = mongoose.model("UserData", userDataSchema);
 
 app.post("/", async (req, res) => {
-  const result = await CheckLoginCredentials(req.body.email, req.body.password);
+  const result = await verifyLoginCredentials(
+    req.body.email,
+    req.body.password
+  );
   const encryptedPassword = cryptr.encrypt(req.body.password);
 
-  if (result.toString()[0] === "2") {
+  if (result.status === 200) {
     await userData.updateMany(
-      { email: req.body.email },
+      { userid: req.body.userid },
       {
         $set: {
+          email: req.body.email,
           password: encryptedPassword,
           clubId: req.body.clubId,
           province: req.body.province,
