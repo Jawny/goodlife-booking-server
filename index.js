@@ -76,19 +76,76 @@ app.post("/", async (req, res) => {
   }
 });
 
-app.post("/payment", cors(), async (req, res) => {
+app.post("/payment/update", cors(), async (req, res) => {
   const { email } = req.body;
-  const customer = await stripe.customers.create({
-    email,
-  });
+  const customer = await stripe.customers.retrieve(email);
+  console.log(customer);
   // Authenticate your user.
-  const session = await stripe.billingPortal.sessions.create({
-    customer: customer.id,
-    items: [{ price: "price_1IQ2EwE6MqegVpJXrqqaXrTJ" }], //CHANGE THIS IT'S INCORRECT
-    return_url: "http://localhost:3000/",
-  });
+  // const session = await stripe.billingPortal.sessions.create({
+  //   customer: customer.id,
+  //   return_url: "http://localhost:3000/",
+  // });
 
-  res.send(session.url);
+  // res.send(session.url);
+});
+app.post("/payment", cors(), async (req, res) => {
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price: "price_1IQ2EwE6MqegVpJXrqqaXrTJ",
+          // For metered billing, do not pass quantity
+          quantity: 1,
+        },
+      ],
+      // {CHECKOUT_SESSION_ID} is a string literal; do not change it!
+      // the actual Session ID is returned in the query parameter when your customer
+      // is redirected to the success page.
+      success_url:
+        "https://example.com/success.html?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "https://example.com/canceled.html",
+    });
+    const checkoutsession = await stripe.checkout.sessions.retrieve(session.id);
+    console.log("checkoutsession", checkoutsession);
+    const portalsession = await stripe.billingPortal.sessions.create({
+      customer: checkoutsession.id,
+      return_url: returnUrl,
+    });
+
+    res.send(portalsession);
+  } catch (e) {
+    res.status(400);
+    return res.send({
+      error: {
+        message: e.message,
+      },
+    });
+  }
+});
+
+app.post("/create-checkout-session", async (req, res) => {
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: "Stubborn Attachments",
+            images: ["https://i.imgur.com/EHyR2nP.png"],
+          },
+          unit_amount: 2000,
+        },
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    success_url: "https://i.imgur.com/EHyR2nP.png",
+    cancel_url: "https://google.com",
+  });
+  res.json({ id: session.id });
 });
 
 // app.post("/payment", cors(), async (req, res) => {
