@@ -76,50 +76,55 @@ app.post("/", async (req, res) => {
   }
 });
 
-app.post("/create-customer-portal-session", cors(), async (req, res) => {
-  const { payment_method, email } = req.body;
+app.post("/payment", cors(), async (req, res) => {
+  const { email } = req.body;
   const customer = await stripe.customers.create({
-    payment_method,
     email,
-    invoice_settings: {
-      default_payment_method: payment_method,
-    },
   });
   // Authenticate your user.
   const session = await stripe.billingPortal.sessions.create({
     customer: customer.id,
+    items: [{ price: "price_1IQ2EwE6MqegVpJXrqqaXrTJ" }], //CHANGE THIS IT'S INCORRECT
     return_url: "http://localhost:3000/",
   });
 
-  res.redirect(session.url);
+  res.send(session.url);
 });
 
-app.post("/payment", cors(), async (req, res) => {
-  const { payment_method, email } = req.body;
-  try {
-    const customer = await stripe.customers.create({
-      payment_method,
-      email,
-      invoice_settings: {
-        default_payment_method: payment_method,
-      },
-    });
+// app.post("/payment", cors(), async (req, res) => {
+//   const { payment_method, email } = req.body;
+//   try {
+//     const customer = await stripe.customers.create({
+//       payment_method,
+//       email,
+//       invoice_settings: {
+//         default_payment_method: payment_method,
+//       },
+//     });
 
-    const subscription = await stripe.subscriptions.create({
-      customer: customer.id,
-      items: [{ plan: "price_1IQ2EwE6MqegVpJXrqqaXrTJ" }],
-      expand: ["latest_invoice.payment_intent"],
-    });
+//     const subscription = await stripe.subscriptions.create({
+//       customer: customer.id,
+//       items: [{ plan: "price_1IQ2EwE6MqegVpJXrqqaXrTJ" }],
+//       expand: ["latest_invoice.payment_intent"],
+//     });
 
-    const status = subscription["latest_invoice"]["payment_intent"]["status"];
-    const clientSecret =
-      subscription["latest_invoice"]["payment_intent"]["client_secret"];
+//     const status = subscription["latest_invoice"]["payment_intent"]["status"];
+//     const clientSecret =
+//       subscription["latest_invoice"]["payment_intent"]["client_secret"];
 
-    res.json({ clientSecret, status });
-  } catch (error) {
-    console.log("error", error);
-    res.json({ message: "payment failed", success: false });
+//     res.json({ clientSecret, status });
+//   } catch (error) {
+//     console.log("error", error);
+//     res.json({ message: "payment failed", success: false });
+//   }
+// });
+
+app.get("/users/:id", async (req, res) => {
+  const users = await userData.findOne({ userid: req.params.id });
+  if (!users) {
+    res.send(false);
   }
+  res.send(true);
 });
 
 // app.post("/payment", cors(), async (req, res) => {
