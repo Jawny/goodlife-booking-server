@@ -8,15 +8,25 @@ const paymentRoute = express.Router();
 /*
 Creates a stripe customer object.
 
-Accept email string and create a stripe customer.
+Accept email string and authUserId and create a stripe customer.
 
-Return the stripe customer object.
+Return the stripe customer object with authUserId in the metadata.
 */
-paymentRoute.get("/create-customer", async (req, res) => {
-  const { email } = req.body;
+paymentRoute.post("/create-customer", async (req, res) => {
+  const { email, authUserId } = req.body;
   const customer = await stripe.customers.create({
     email,
+    metadata: { auth: authUserId },
   });
+
+  res.send(customer);
+});
+
+paymentRoute.post("/retrieve-customer", async (req, res) => {
+  const { customerId } = req.body;
+
+  const customer = await stripe.customers.retrieve(customerId);
+
   res.send(customer);
 });
 
@@ -24,7 +34,7 @@ paymentRoute.get("/create-customer", async (req, res) => {
 Creates a checkout page url for the customer with 
 the Goodlife $10 subscription selected as the product.
 
-Accept email and customerId strings. 
+Accept email, auth userId, and customerId strings. 
 
 Return the stripe checkout session object.
 */
@@ -40,7 +50,7 @@ paymentRoute.get("/create-checkout", async (req, res) => {
     cancel_url: `${process.env.DOMAIN}/error`,
   });
 
-  console.log(session);
+  // console.log(session);
   res.send(session);
 });
 

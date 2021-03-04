@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const { paymentRoute, usersRoute } = require("./routes/index");
+const { paymentRoute, usersRoute, webhook } = require("./routes/index");
 require("dotenv").config();
 
 mongoose.connect(
@@ -25,5 +25,6 @@ app.use(bodyParser.json());
 // Add payments and users routes
 app.use("/payments", paymentRoute);
 app.use("/users", usersRoute);
+app.use("/webhook", webhook);
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`)); // listens on this port
