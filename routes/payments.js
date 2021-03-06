@@ -18,7 +18,6 @@ paymentRoute.post("/create-customer", async (req, res) => {
     email,
     metadata: { auth: authUserId },
   });
-
   res.send(customer);
 });
 
@@ -38,11 +37,11 @@ Accept email, auth userId, and customerId strings.
 
 Return the stripe checkout session object.
 */
-paymentRoute.get("/create-checkout", async (req, res) => {
+paymentRoute.post("/create-checkout", async (req, res) => {
   const { email, customerId } = req.body;
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
-    customer_email: email,
+    client_reference_id: customerId,
     payment_method_types: ["card"],
     line_items: [{ price: "price_1IQ2EwE6MqegVpJXrqqaXrTJ", quantity: 1 }],
     mode: "subscription",
@@ -50,7 +49,6 @@ paymentRoute.get("/create-checkout", async (req, res) => {
     cancel_url: `${process.env.DOMAIN}/error`,
   });
 
-  // console.log(session);
   res.send(session);
 });
 
