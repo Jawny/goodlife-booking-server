@@ -46,6 +46,7 @@ paymentRoute.post("/create-checkout", async (req, res) => {
     payment_method_types: ["card"],
     line_items: [{ price: process.env.STRIPE_ITEM, quantity: 1 }],
     mode: "subscription",
+    allow_promotion_codes: true,
     success_url: `${process.env.DOMAIN}/success`,
     cancel_url: `${process.env.DOMAIN}/error`,
   });
