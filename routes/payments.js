@@ -39,6 +39,7 @@ Return the stripe checkout session object.
 */
 paymentRoute.post("/create-checkout", async (req, res) => {
   const { email, customerId } = req.body;
+  console.log("customerid", customerId);
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     client_reference_id: customerId,
@@ -48,7 +49,7 @@ paymentRoute.post("/create-checkout", async (req, res) => {
     success_url: `${process.env.DOMAIN}/success`,
     cancel_url: `${process.env.DOMAIN}/error`,
   });
-
+  console.log("session", session);
   res.send(session);
 });
 
@@ -62,7 +63,7 @@ to the profile page.
 
 Return the billing portal url link.
 */
-paymentRoute.get("/update-billing-information", async (req, res) => {
+paymentRoute.post("/update-billing-information", async (req, res) => {
   const { customerId } = req.body;
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
@@ -79,12 +80,13 @@ Accept subscriptionId string.
 
 Return subscription. status will return either "active" or "cancelled" or 404.
 */
-paymentRoute.get("/get-subscription-status", async (req, res) => {
+paymentRoute.post("/get-subscription-status", async (req, res) => {
   const { subscriptionId } = req.body;
+  console.log("sub", req.body);
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
   if (subscription) {
-    res.send(subscription);
+    res.send(subscription.status);
     return;
   }
 

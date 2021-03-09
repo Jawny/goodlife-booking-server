@@ -1,6 +1,7 @@
 const express = require("express");
 const Cryptr = require("cryptr");
 const { userData } = require("../schema");
+const { verifyLoginCredentials } = require("../utils/index");
 
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 const usersRoute = express.Router();
@@ -16,12 +17,9 @@ usersRoute.get("/:id", async (req, res) => {
   const { id } = req.params;
 
   const userId = await userData.findOne({ "auth.userId": id });
-  if (!userId) {
-    res.send(false);
-    return;
-  }
+  console.log(userId);
 
-  res.send(true);
+  res.send(userId);
 });
 
 /*
@@ -67,6 +65,7 @@ Return 200 if user's Goodlife information is updated, else return the error.
 */
 usersRoute.put("/update-user-goodlife", async (req, res) => {
   const {
+    authUserId,
     email,
     password,
     province,
@@ -79,9 +78,10 @@ usersRoute.put("/update-user-goodlife", async (req, res) => {
     saturday,
     sunday,
   } = req.body;
+
   const verification = await verifyLoginCredentials(email, password);
 
-  if (!verification) {
+  if (verification.status !== 200) {
     res.send({ status: 400 });
     return;
   }
@@ -90,9 +90,10 @@ usersRoute.put("/update-user-goodlife", async (req, res) => {
 
   await userData
     .findOneAndUpdate(
-      { "goodlife.email": email },
+      { "auth.userId": authUserId },
       {
         $set: {
+          "goodlife.email": email,
           "goodlife.password": encryptedPassword,
           "goodlife.province": province,
           "goodlife.clubId": clubId,
