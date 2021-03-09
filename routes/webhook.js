@@ -1,4 +1,5 @@
 const express = require("express");
+const delay = require("delay");
 const Stripe = require("stripe");
 require("dotenv").config();
 const { userData } = require("../schema");
@@ -14,30 +15,32 @@ webhook.post("/customer-sub-created", async (req, res) => {
   const subscriptionId = event.data.object.id;
   // Retrieve customer
   const customer = await stripe.customers.retrieve(customerId);
+  console.log("sub customer", customer);
   // update metadata
   let metaData = customer.metadata;
   metaData["sub_id"] = subscriptionId;
   await stripe.customers.update(customerId, { metadata: metaData });
-
+  console.log(metaData);
   res.send({ status: 200 });
 });
 
-// sub updated be teh same as sub created? or do you have to consider cancelled case
-
-webhook.post("/payment-success", async (req, res) => {
+webhook.post("/checkout-complete", async (req, res) => {
+  await delay(5000);
   const event = req.body;
   // Retrieve customer
   const customerId = event.data.object.customer;
   const customer = await stripe.customers.retrieve(customerId);
   const customerEmail = customer.email;
-  console.log("customer", customer);
+  // console.log("customer", customer);
   // Retrieve metadata
   const metaData = customer.metadata;
   const { auth, sub_id: subId } = metaData;
+  console.log("metaData", metaData);
   // Retrieve subscription status
   const subscription = await stripe.subscriptions.retrieve(subId);
+  // console.log("subscription:", subscription);
   if (!subscription.status.toLowerCase() === "active") {
-    console.log("sub status not active:", subscription.status);
+    // console.log("sub status not active:", subscription.status);
     res.send({ status: 400, msg: "inactive subscription" });
     return;
   }
@@ -64,14 +67,5 @@ webhook.post("/payment-success", async (req, res) => {
 
   res.send({ status: 200 });
 });
-
-// webhook.post("/checkout-complete", async (req, res) => {
-//   const event = req.body;
-//   console.log("checkout-complete", event);
-//   // retrieve customer
-//   const customerId = event.data.object.customer;
-//   // update database
-//   res.send({ status: 200 });
-// });
 
 module.exports = webhook;
