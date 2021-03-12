@@ -66,6 +66,8 @@ Return 200 if user's Goodlife information is updated, else return the error.
 usersRoute.put("/update-user-goodlife", async (req, res) => {
   const {
     authUserId,
+    authEmail,
+    verified,
     email,
     password,
     province,
@@ -93,6 +95,8 @@ usersRoute.put("/update-user-goodlife", async (req, res) => {
       { "auth.userId": authUserId },
       {
         $set: {
+          "auth.email": authEmail,
+          "auth.verified": verified,
           "goodlife.email": email,
           "goodlife.password": encryptedPassword,
           "goodlife.province": province,
@@ -104,6 +108,39 @@ usersRoute.put("/update-user-goodlife", async (req, res) => {
           "goodlife.friday": friday,
           "goodlife.saturday": saturday,
           "goodlife.sunday": sunday,
+        },
+      }
+    )
+    .exec((err, result) => {
+      if (err) {
+        res.send(err);
+        return;
+      }
+    });
+
+  res.send({ status: 200 });
+});
+
+/*
+Updates a user's Auth information
+
+Accept Auth properties (See Schema for details). Check if the Auth
+account is valid. If not then return 400 else query the db for the data and
+update their details.
+
+Return 200 if user's Auth information is updated, else return the error.
+*/
+// UNTESTED ENDPOINT
+usersRoute.put("/update-user-auth", async (req, res) => {
+  const { authUserId, email, verified } = req.body;
+
+  await userData
+    .findOneAndUpdate(
+      { "auth.userId": authUserId },
+      {
+        $set: {
+          "auth.email": email,
+          "auth.verified": verified,
         },
       }
     )
