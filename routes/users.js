@@ -81,12 +81,12 @@ usersRoute.put("/update-user-goodlife", async (req, res) => {
     sunday,
   } = req.body;
 
-  const verification = await verifyLoginCredentials(email, password);
+  // const verification = await verifyLoginCredentials(email, password);
 
-  if (verification.status !== 200) {
-    res.send({ status: 400 });
-    return;
-  }
+  // if (verification.status !== 200) {
+  //   res.send({ status: 400 });
+  //   return;
+  // }
 
   const encryptedPassword = cryptr.encrypt(password);
 
