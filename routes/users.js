@@ -80,43 +80,42 @@ usersRoute.put("/update-user-goodlife", async (req, res) => {
     saturday,
     sunday,
   } = req.body;
-
-  // const verification = await verifyLoginCredentials(email, password);
+  const verification = await verifyLoginCredentials(email, password);
 
   // if (verification.status !== 200) {
   //   res.send({ status: 400 });
   //   return;
   // }
 
-  const encryptedPassword = cryptr.encrypt(password);
+  // const encryptedPassword = cryptr.encrypt(password);
 
-  await userData
-    .findOneAndUpdate(
-      { "auth.userId": authUserId },
-      {
-        $set: {
-          "auth.email": authEmail,
-          "auth.verified": verified,
-          "goodlife.email": email,
-          "goodlife.password": encryptedPassword,
-          "goodlife.province": province,
-          "goodlife.clubId": clubId,
-          "goodlife.monday": monday,
-          "goodlife.tuesday": tuesday,
-          "goodlife.wednesday": wednesday,
-          "goodlife.thursday": thursday,
-          "goodlife.friday": friday,
-          "goodlife.saturday": saturday,
-          "goodlife.sunday": sunday,
-        },
-      }
-    )
-    .exec((err, result) => {
-      if (err) {
-        res.send(err);
-        return;
-      }
-    });
+  // await userData
+  //   .findOneAndUpdate(
+  //     { "auth.userId": authUserId },
+  //     {
+  //       $set: {
+  //         "auth.email": authEmail,
+  //         "auth.verified": verified,
+  //         "goodlife.email": email,
+  //         "goodlife.password": encryptedPassword,
+  //         "goodlife.province": province,
+  //         "goodlife.clubId": clubId,
+  //         "goodlife.monday": monday,
+  //         "goodlife.tuesday": tuesday,
+  //         "goodlife.wednesday": wednesday,
+  //         "goodlife.thursday": thursday,
+  //         "goodlife.friday": friday,
+  //         "goodlife.saturday": saturday,
+  //         "goodlife.sunday": sunday,
+  //       },
+  //     }
+  //   )
+  //   .exec((err, result) => {
+  //     if (err) {
+  //       res.send(err);
+  //       return;
+  //     }
+  //   });
 
   res.send({ status: 200 });
 });

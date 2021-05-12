@@ -1,3 +1,3 @@
-const { verifyLoginCredentials } = require("./verifyLoginCredentials");
+const verifyLoginCredentials = require("./verifyLoginCredentials");
 
 module.exports = { verifyLoginCredentials };
